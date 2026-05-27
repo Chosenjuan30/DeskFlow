@@ -1,0 +1,104 @@
+---
+title: DeskFlow — Entity Relationship Diagram
+---
+erDiagram
+    USER {
+        uuid id PK
+        varchar email UK
+        varchar password
+        varchar first_name
+        varchar last_name
+        enum role "CUSTOMER|SUPPORT_AGENT|SUPERVISOR|ADMIN"
+        boolean active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    AGENT_PROFILE {
+        uuid id PK
+        uuid user_id FK
+        varchar[] expertise
+        int max_capacity
+        int current_load
+        boolean available
+    }
+
+    TICKET {
+        uuid id PK
+        varchar reference_no UK
+        varchar title
+        text description
+        enum category "BILLING|TECHNICAL|GENERAL|ACCOUNT|SHIPPING"
+        enum priority "LOW|MEDIUM|HIGH|CRITICAL"
+        enum status "OPEN|IN_PROGRESS|PENDING_CUSTOMER|RESOLVED|CLOSED"
+        uuid customer_id FK
+        uuid assigned_agent_id FK
+        uuid sla_policy_id FK
+        timestamp sla_deadline
+        boolean escalated
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    TICKET_STATUS_UPDATE {
+        uuid id PK
+        uuid ticket_id FK
+        uuid changed_by FK
+        enum old_status
+        enum new_status
+        text comment
+        timestamp created_at
+    }
+
+    AGENT_ASSIGNMENT {
+        uuid id PK
+        uuid ticket_id FK "UNIQUE"
+        uuid agent_id FK
+        timestamp assigned_at
+        enum assigned_by "SYSTEM|MANUAL"
+        text notes
+    }
+
+    SLA_POLICY {
+        uuid id PK
+        varchar name
+        enum priority
+        int resolution_hours
+        int warning_hours
+        boolean active
+    }
+
+    ESCALATION_LOG {
+        uuid id PK
+        uuid ticket_id FK
+        uuid escalated_to FK
+        text reason
+        timestamp escalated_at
+        boolean resolved
+        timestamp resolved_at
+    }
+
+    NOTIFICATION {
+        uuid id PK
+        uuid recipient_id FK
+        enum type "TICKET_ASSIGNED|STATUS_CHANGED|SLA_WARNING|ESCALATION|SYSTEM"
+        varchar title
+        text body
+        enum channel "IN_APP|EMAIL|BOTH"
+        boolean read
+        uuid ticket_id FK
+        timestamp created_at
+    }
+
+    USER ||--o| AGENT_PROFILE : "has profile"
+    USER ||--o{ TICKET : "submits"
+    USER ||--o{ TICKET : "assigned to"
+    USER ||--o{ TICKET_STATUS_UPDATE : "records"
+    USER ||--o{ AGENT_ASSIGNMENT : "receives"
+    USER ||--o{ ESCALATION_LOG : "escalated to"
+    USER ||--o{ NOTIFICATION : "receives"
+    TICKET ||--o{ TICKET_STATUS_UPDATE : "has history"
+    TICKET ||--o| AGENT_ASSIGNMENT : "has assignment"
+    TICKET ||--o{ ESCALATION_LOG : "may escalate"
+    TICKET ||--o{ NOTIFICATION : "triggers"
+    TICKET }o--|| SLA_POLICY : "governed by"

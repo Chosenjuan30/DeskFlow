@@ -1,0 +1,44 @@
+---
+title: DeskFlow — SLA & Escalation Flow
+---
+sequenceDiagram
+    participant Sched as SLACheckerScheduler<br/>(every 60 s)
+    participant SLAS as SLAService
+    participant Kafka as Apache Kafka
+    participant EC as EscalationEventConsumer
+    participant ES as EscalationService
+    participant NS as NotificationService
+    participant DB as PostgreSQL
+    participant WS as WebSocket
+
+    loop Every 60 seconds
+        Sched->>DB: query OPEN/IN_PROGRESS/PENDING_CUSTOMER tickets
+        DB-->>Sched: ticket list with sla_deadline
+
+        loop For each ticket
+            Sched->>SLAS: checkTicket(ticket)
+
+            alt now > deadline - warning_hours AND not warned
+                SLAS->>Kafka: publish sla.warning {ticketId, priority, deadline}
+                Kafka->>NS: SLAWarningEvent consumed
+                NS->>DB: persist Notification (SLA_WARNING)
+                NS->>WS: push to agent /user/queue/notifications
+            else now > deadline AND not escalated
+                SLAS->>DB: ticket.escalated = true
+                SLAS->>Kafka: publish sla.breached {ticketId, priority, agentId}
+
+                Kafka->>EC: SLABreachedEvent consumed
+                EC->>ES: escalate(ticketId)
+                ES->>DB: find available Supervisor (round-robin)
+                ES->>DB: create EscalationLog
+                ES->>Kafka: publish escalations.created {ticketId, supervisorId}
+
+                Kafka->>NS: EscalationCreatedEvent consumed
+                NS->>DB: persist Notification (ESCALATION) for Supervisor
+                NS->>DB: persist Notification (ESCALATION) for Agent
+                NS->>WS: push to supervisor /user/queue/notifications
+                NS->>WS: push to agent /user/queue/notifications
+                NS->>NS: sendEmail(supervisor, escalation details)
+            end
+        end
+    end

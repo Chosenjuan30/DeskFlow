@@ -1,0 +1,53 @@
+---
+title: DeskFlow — Authentication Flow
+---
+sequenceDiagram
+    actor Client
+    participant API as Auth Controller
+    participant Auth as AuthService
+    participant JWT as JwtTokenProvider
+    participant DB as PostgreSQL
+    participant Cache as Redis
+
+    %% Registration
+    Note over Client,Cache: Registration
+    Client->>API: POST /auth/register {email, password, name}
+    API->>Auth: register(request)
+    Auth->>DB: save User (BCrypt password)
+    Auth-->>Client: 201 Created {userId}
+
+    %% Login
+    Note over Client,Cache: Login
+    Client->>API: POST /auth/login {email, password}
+    API->>Auth: login(request)
+    Auth->>DB: findByEmail(email)
+    Auth->>Auth: verify BCrypt password
+    Auth->>JWT: generateAccessToken(user) → 15 min
+    Auth->>JWT: generateRefreshToken(user) → 7 days
+    Auth->>Cache: SET refresh:{userId} = tokenHash (TTL 7d)
+    Auth-->>Client: 200 OK {accessToken, refreshToken, expiresIn}
+
+    %% Authenticated Request
+    Note over Client,Cache: Authenticated Request
+    Client->>API: GET /api/v1/tickets (Bearer accessToken)
+    API->>JWT: validateToken(accessToken)
+    JWT->>Cache: GET blacklist:{jti} → check revoked
+    JWT-->>API: valid → SecurityContext populated
+    API-->>Client: 200 OK {tickets}
+
+    %% Token Refresh
+    Note over Client,Cache: Token Refresh
+    Client->>API: POST /auth/refresh {refreshToken}
+    API->>Auth: refresh(refreshToken)
+    Auth->>JWT: extractUserId(refreshToken)
+    Auth->>Cache: GET refresh:{userId} → compare hash
+    Auth->>JWT: generateAccessToken(user) → new 15 min
+    Auth-->>Client: 200 OK {accessToken, expiresIn}
+
+    %% Logout
+    Note over Client,Cache: Logout
+    Client->>API: POST /auth/logout (Bearer accessToken)
+    API->>Auth: logout(userId, jti)
+    Auth->>Cache: DEL refresh:{userId}
+    Auth->>Cache: SET blacklist:{jti} (TTL = token remaining life)
+    Auth-->>Client: 204 No Content

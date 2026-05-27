@@ -1,0 +1,62 @@
+---
+title: DeskFlow — Deployment Topology (Docker Compose / Kubernetes)
+---
+graph TB
+    subgraph Internet
+        USER_BROWSER[Client Browser / Mobile]
+    end
+
+    subgraph Ingress Layer
+        LB[Load Balancer / Nginx Ingress\nTLS Termination]
+    end
+
+    subgraph Application Tier
+        APP1[DeskFlow Pod 1\nSpring Boot :8080]
+        APP2[DeskFlow Pod 2\nSpring Boot :8080]
+        HPA[HorizontalPodAutoscaler\nmin 2 · max 10 · CPU 70%]
+    end
+
+    subgraph Data Tier
+        PG[(PostgreSQL 16\nStatefulSet / RDS)]
+        REDIS[(Redis 7\nStatefulSet / Elasticache)]
+    end
+
+    subgraph Messaging Tier
+        ZK[Zookeeper]
+        K1[Kafka Broker 1]
+        K2[Kafka Broker 2]
+        K3[Kafka Broker 3]
+        ZK --> K1
+        ZK --> K2
+        ZK --> K3
+    end
+
+    subgraph Observability
+        PROM[Prometheus]
+        GRAFANA[Grafana Dashboards]
+        ZIPKIN[Zipkin Tracing]
+        LOGS[Log Aggregator\nELK / Loki]
+    end
+
+    USER_BROWSER --> LB
+    LB --> APP1
+    LB --> APP2
+    HPA -.manages.-> APP1
+    HPA -.manages.-> APP2
+
+    APP1 --> PG
+    APP2 --> PG
+    APP1 --> REDIS
+    APP2 --> REDIS
+    APP1 --> K1
+    APP2 --> K1
+    K1 --> APP1
+    K1 --> APP2
+
+    APP1 --> PROM
+    APP2 --> PROM
+    PROM --> GRAFANA
+    APP1 --> ZIPKIN
+    APP2 --> ZIPKIN
+    APP1 --> LOGS
+    APP2 --> LOGS

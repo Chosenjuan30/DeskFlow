@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- ── Development: human-readable console ────────────────── -->
+    <springProfile name="dev">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %cyan(%logger{36}) [%X{traceId:-}] [%X{userId:-}] - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="com.deskflow" level="DEBUG"/>
+        <logger name="org.springframework.security" level="DEBUG"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- ── Production: structured JSON for log aggregators ────── -->
+    <springProfile name="prod">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <providers>
+                    <timestamp/>
+                    <logLevel/>
+                    <loggerName/>
+                    <threadName/>
+                    <message/>
+                    <mdc>
+                        <includeMdcKeyName>traceId</includeMdcKeyName>
+                        <includeMdcKeyName>userId</includeMdcKeyName>
+                        <includeMdcKeyName>ticketId</includeMdcKeyName>
+                        <includeMdcKeyName>module</includeMdcKeyName>
+                    </mdc>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+
+        <logger name="com.deskflow" level="INFO"/>
+
+        <root level="WARN">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

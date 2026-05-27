@@ -1,0 +1,27 @@
+---
+title: DeskFlow — Ticket Status State Machine
+---
+stateDiagram-v2
+    [*] --> OPEN : Customer submits ticket\n(TicketCreatedEvent fired)
+
+    OPEN --> IN_PROGRESS : Agent picks up ticket\n(AgentAssignedEvent fired)
+
+    IN_PROGRESS --> PENDING_CUSTOMER : Agent awaiting\ncustomer response
+
+    PENDING_CUSTOMER --> IN_PROGRESS : Customer replies\nor provides info
+
+    IN_PROGRESS --> RESOLVED : Agent marks resolved\n(TicketStatusChangedEvent fired)
+
+    RESOLVED --> CLOSED : Customer confirms\nOR auto-close after 72 h
+
+    RESOLVED --> IN_PROGRESS : Customer reopens\n(issue persists)
+
+    OPEN --> OPEN : SLA warning issued\n(sla.warning event)
+
+    IN_PROGRESS --> IN_PROGRESS : SLA warning issued\n(sla.warning event)
+
+    OPEN --> OPEN : SLA breached →\nauto-escalation\n(sla.breached event)
+
+    IN_PROGRESS --> IN_PROGRESS : SLA breached →\nauto-escalation\n(sla.breached event)
+
+    CLOSED --> [*]

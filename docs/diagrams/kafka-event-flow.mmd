@@ -1,0 +1,46 @@
+---
+title: DeskFlow — Kafka Event Flow
+---
+flowchart LR
+    subgraph Producers
+        TS[TicketService]
+        AS[AssignmentService]
+        SS[SLACheckerScheduler]
+        ES[EscalationService]
+    end
+
+    subgraph Topics
+        T1["deskflow.tickets.created\n(6 partitions)"]
+        T2["deskflow.tickets.status-changed\n(6 partitions)"]
+        T3["deskflow.assignments.created\n(3 partitions)"]
+        T4["deskflow.sla.warning\n(3 partitions)"]
+        T5["deskflow.sla.breached\n(3 partitions)"]
+        T6["deskflow.escalations.created\n(3 partitions)"]
+    end
+
+    subgraph Consumers
+        AC[AssignmentEventConsumer\nGroup: assignment-service]
+        NC[NotificationEventConsumer\nGroup: notification-service]
+        EC[EscalationEventConsumer\nGroup: escalation-service]
+        ANC[AnalyticsEventConsumer\nGroup: analytics-service]
+    end
+
+    TS -- TicketCreatedEvent --> T1
+    TS -- TicketStatusChangedEvent --> T2
+    AS -- AgentAssignedEvent --> T3
+    SS -- SLAWarningEvent --> T4
+    SS -- SLABreachedEvent --> T5
+    ES -- TicketEscalatedEvent --> T6
+
+    T1 --> AC
+    T1 --> ANC
+    T2 --> NC
+    T2 --> ANC
+    T3 --> NC
+    T4 --> NC
+    T5 --> EC
+    T5 --> NC
+    T6 --> NC
+
+    AC -- calls --> AS
+    EC -- calls --> ES

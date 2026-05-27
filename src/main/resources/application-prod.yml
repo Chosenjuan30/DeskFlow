@@ -1,0 +1,31 @@
+# ── Production profile overrides ─────────────────────────────
+spring:
+  jpa:
+    show-sql: false
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  thymeleaf:
+    cache: true
+
+server:
+  port: 8080
+
+management:
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+
+# Disable Swagger in production (enable behind VPN if needed)
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+logging:
+  level:
+    com.deskflow: INFO
+    root: WARN

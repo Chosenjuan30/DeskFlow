@@ -1,0 +1,55 @@
+# ── Environment ───────────────────────────────────────────────
+.env
+*.env.local
+
+# ── Java / Maven ──────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/wrapper/maven-wrapper.jar
+
+# ── IntelliJ IDEA ─────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# ── Eclipse ───────────────────────────────────────────────────
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# ── VS Code ───────────────────────────────────────────────────
+.vscode/
+
+# ── Node / Frontend ───────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+
+# ── Docker volumes ────────────────────────────────────────────
+docker/volumes/
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Coverage ──────────────────────────────────────────────────
+jacoco.exec

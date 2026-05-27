@@ -1,0 +1,70 @@
+---
+title: DeskFlow — Modular Monolith Architecture
+---
+graph TB
+    subgraph Clients
+        C[Customer Client]
+        A[Agent / Supervisor Client]
+        AD[Admin Client]
+    end
+
+    subgraph DeskFlow Monolith
+        AUTH[Auth Module<br/>JWT · Register · Login · Refresh]
+        USER[User Module<br/>Users · AgentProfiles · Roles]
+        TICKET[Ticket Module<br/>CRUD · Status Workflow · Events]
+        ASSIGN[Assignment Module<br/>Expertise-Match Algorithm]
+        NOTIF[Notification Module<br/>In-App · Email · WebSocket]
+        SLA[SLA Module<br/>Policies · Deadline Tracker · Scheduler]
+        ESC[Escalation Module<br/>EscalationLog · Supervisor Routing]
+        ANALYTICS[Analytics Module<br/>Reports · Dashboards]
+
+        SHARED[Shared Kernel<br/>BaseEntity · Events · Security · Exceptions · Utils]
+        INFRA[Infrastructure<br/>KafkaProducer · CacheService]
+    end
+
+    subgraph External Services
+        PG[(PostgreSQL 16)]
+        REDIS[(Redis 7)]
+        KAFKA[Apache Kafka 3.7]
+        MAIL[SMTP / MailHog]
+    end
+
+    C -- REST / WS --> AUTH
+    A -- REST / WS --> AUTH
+    AD -- REST / WS --> AUTH
+
+    AUTH --> USER
+    TICKET --> ASSIGN
+    TICKET --> SLA
+    TICKET --> INFRA
+    ASSIGN --> INFRA
+    SLA --> INFRA
+    ESC --> INFRA
+
+    INFRA --> KAFKA
+    KAFKA --> ASSIGN
+    KAFKA --> NOTIF
+    KAFKA --> ESC
+    KAFKA --> ANALYTICS
+
+    NOTIF --> MAIL
+    NOTIF --> REDIS
+
+    AUTH --> REDIS
+    ANALYTICS --> REDIS
+
+    TICKET --> PG
+    USER --> PG
+    ASSIGN --> PG
+    NOTIF --> PG
+    SLA --> PG
+    ESC --> PG
+    ANALYTICS --> PG
+
+    AUTH -.-> SHARED
+    TICKET -.-> SHARED
+    ASSIGN -.-> SHARED
+    NOTIF -.-> SHARED
+    SLA -.-> SHARED
+    ESC -.-> SHARED
+    ANALYTICS -.-> SHARED

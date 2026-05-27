@@ -1,0 +1,25 @@
+# ── Development profile overrides ────────────────────────────
+spring:
+  jpa:
+    show-sql: true
+
+  data:
+    redis:
+      port: ${REDIS_PORT:6380}   # DeskFlow dev Redis mapped to 6380 (6379 used by other projects)
+
+  thymeleaf:
+    cache: false    # live template reload in dev
+
+logging:
+  level:
+    com.deskflow: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.kafka: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+
+# Swagger fully open in dev
+springdoc:
+  swagger-ui:
+    enabled: true
