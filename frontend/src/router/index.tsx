@@ -11,6 +11,8 @@ import CustomerDashboardPage from '@/modules/customer/pages/CustomerDashboardPag
 import SubmitTicketPage from '@/modules/ticket/pages/SubmitTicketPage'
 import MyTicketsPage from '@/modules/ticket/pages/MyTicketsPage'
 import TicketDetailPage from '@/modules/ticket/pages/TicketDetailPage'
+import AgentDashboardPage from '@/modules/agent/pages/AgentDashboardPage'
+import AgentTicketDetailPage from '@/modules/agent/pages/AgentTicketDetailPage'
 
 // ── Placeholder page component used until real pages are built ─
 function ComingSoon({ name }: { name: string }) {
@@ -66,8 +68,8 @@ const router = createBrowserRouter([
               {
                 element: <RoleGuard allowedRoles={['SUPPORT_AGENT']} redirectTo={ROUTES.LOGIN} />,
                 children: [
-                  { path: 'agent/dashboard',         element: <ComingSoon name="Agent Dashboard" /> },
-                  { path: 'agent/tickets/:id',       element: <ComingSoon name="Ticket Workspace" /> },
+                  { path: 'agent/dashboard',         element: <AgentDashboardPage /> },
+                  { path: 'agent/tickets/:id',       element: <AgentTicketDetailPage /> },
                 ],
               },
 
