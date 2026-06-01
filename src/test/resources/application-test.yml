@@ -1,0 +1,19 @@
+# Test profile — used by all @SpringBootTest tests
+spring:
+  jpa:
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers:localhost:9092}
+
+  mail:
+    host: localhost
+    port: 3025
+
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    com.deskflow: DEBUG
+    org.springframework.security: INFO

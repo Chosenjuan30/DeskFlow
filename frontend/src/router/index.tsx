@@ -5,6 +5,12 @@ import AuthLayout from '@/shared/components/layouts/AuthLayout'
 import DashboardLayout from '@/shared/components/layouts/DashboardLayout'
 import ProtectedRoute from '@/shared/components/ProtectedRoute'
 import RoleGuard from '@/shared/components/RoleGuard'
+import LoginPage from '@/modules/auth/pages/LoginPage'
+import RegisterPage from '@/modules/auth/pages/RegisterPage'
+import CustomerDashboardPage from '@/modules/customer/pages/CustomerDashboardPage'
+import SubmitTicketPage from '@/modules/ticket/pages/SubmitTicketPage'
+import MyTicketsPage from '@/modules/ticket/pages/MyTicketsPage'
+import TicketDetailPage from '@/modules/ticket/pages/TicketDetailPage'
 
 // ── Placeholder page component used until real pages are built ─
 function ComingSoon({ name }: { name: string }) {
@@ -32,14 +38,8 @@ const router = createBrowserRouter([
       {
         element: <AuthLayout />,
         children: [
-          {
-            path: 'login',
-            element: <ComingSoon name="Login" />, // replaced in Phase 1
-          },
-          {
-            path: 'register',
-            element: <ComingSoon name="Register" />, // replaced in Phase 1
-          },
+          { path: 'login',    element: <LoginPage /> },
+          { path: 'register', element: <RegisterPage /> },
         ],
       },
 
@@ -55,10 +55,10 @@ const router = createBrowserRouter([
               {
                 element: <RoleGuard allowedRoles={['CUSTOMER']} redirectTo={ROUTES.LOGIN} />,
                 children: [
-                  { path: 'customer/dashboard',     element: <ComingSoon name="Customer Dashboard" /> },
-                  { path: 'customer/tickets',        element: <ComingSoon name="My Tickets" /> },
-                  { path: 'customer/tickets/new',    element: <ComingSoon name="Submit Ticket" /> },
-                  { path: 'customer/tickets/:id',    element: <ComingSoon name="Ticket Detail" /> },
+                  { path: 'customer/dashboard',   element: <CustomerDashboardPage /> },
+                  { path: 'customer/tickets',      element: <MyTicketsPage /> },
+                  { path: 'customer/tickets/new',  element: <SubmitTicketPage /> },
+                  { path: 'customer/tickets/:id',  element: <TicketDetailPage /> },
                 ],
               },
 
